@@ -2,7 +2,7 @@ from datetime import date, timedelta
 from models.loan import Loan
 from utils.fine_calculator import calculate_fine, fine_report
 
-DEFAULT_LOAN_DAYS = 14  # срок выдачи по умолчанию
+DEFAULT_LOAN_DAYS = 14
 
 
 class User:
@@ -10,7 +10,7 @@ class User:
         self._name = name
         self._id = user_id
         self._borrowed_books: list = []
-        self._loans: list[Loan] = []  # ← НОВОЕ: история займов
+        self._loans: list[Loan] = []
 
     @property
     def name(self):
@@ -20,7 +20,6 @@ class User:
     def user_id(self):
         return self._id
 
-    # ↓ ИЗМЕНЕНО: принимает опциональный due_date
     def borrow_book(self, book, due_date: date = None):
         book.borrow()
         if due_date is None:
@@ -42,7 +41,6 @@ class User:
         if return_date is None:
             return_date = date.today()
 
-        # Находим активный займ для этой книги
         loan = next(
             (l for l in self._loans if l.book_title ==
              book.title and l.return_date is None),

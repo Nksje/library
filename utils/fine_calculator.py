@@ -1,8 +1,8 @@
 from models.loan import Loan
 
-FINE_RATE_PER_DAY = 0.25   # €/день
-MAX_FINE = 20.0             # максимальный штраф €
-GRACE_PERIOD_DAYS = 1       # 1 день без штрафа
+FINE_RATE_PER_DAY = 0.25
+MAX_FINE = 20.0
+GRACE_PERIOD_DAYS = 1
 
 
 def calculate_fine(loan: Loan) -> float:
@@ -12,10 +12,10 @@ def calculate_fine(loan: Loan) -> float:
 
 def fine_report(loan: Loan) -> str:
     fine = calculate_fine(loan)
-    status = "✅ сдана" if loan.return_date else "🔴 не сдана"
-    fine_str = f"💰 Пеня: {fine:.2f} €" if fine > 0 else "✅ Пени нет"
+    status = "✅ returned" if loan.return_date else "🔴 not returned"
+    fine_str = f"💰 Fine: {fine:.2f} €" if fine > 0 else "✅ No fine"
     return (
         f"📚 «{loan.book_title}» | 👤 {loan.user_name}\n"
-        f"   Срок: {loan.due_date} | Статус: {status}\n"
-        f"   Просрочено: {loan.overdue_days} дн. | {fine_str}"
+        f"   Due date: {loan.due_date} | Status: {status}\n"
+        f"   Overdue: {loan.overdue_days} days | {fine_str}"
     )

@@ -26,7 +26,7 @@ class Loan:
         }
 
     @staticmethod
-    def from_dict(data) -> "Loan":
+    def from_dict(data: dict) -> "Loan":
         return Loan(
             book_title=data["book_title"],
             user_name=data["user_name"],
