@@ -1,0 +1,29 @@
+{
+  "name": "Narva City Library",
+  "books": [
+    {
+      "type": "physical",
+      "title": "Clean code",
+      "author": "Robert Martin",
+      "year": 2008,
+      "pages": 464,
+      "is_available": true
+    },
+    {
+      "type": "ebook",
+      "title": "Design patterns",
+      "author": "Group of four",
+      "year": 1994,
+      "size_mb": 12.5,
+      "is_available": true
+    },
+    {
+      "type": "physical",
+      "title": "Learning Python",
+      "author": "Mark Lutz",
+      "year": 2019,
+      "pages": 1200,
+      "is_available": true
+    }
+  ]
+}
