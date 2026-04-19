@@ -1,16 +1,24 @@
 from datetime import date, timedelta
+
+from abstractions.protocols import FinePolicy
 from models.loan import Loan
-from utils.fine_calculator import calculate_fine, fine_report
+from utils.fine_calculator import StandardFinePolicy, fine_report
 
 DEFAULT_LOAN_DAYS = 14
 
 
 class User:
-    def __init__(self, name: str, user_id: int):
+    def __init__(
+        self,
+        name: str,
+        user_id: int,
+        fine_policy: FinePolicy | None = None,
+    ):
         self._name = name
         self._id = user_id
         self._borrowed_books: list = []
         self._loans: list[Loan] = []
+        self._fine_policy: FinePolicy = fine_policy or StandardFinePolicy()
 
     @property
     def name(self):
@@ -48,8 +56,8 @@ class User:
         )
         if loan:
             loan.return_date = return_date
-            fine = calculate_fine(loan)
-            print(fine_report(loan))
+            fine = self._fine_policy.calculate(loan)
+            print(fine_report(loan, self._fine_policy))
             if fine > 0:
                 print(f"   ⚠️  Пожалуйста, оплатите пеню: {fine:.2f} €")
 

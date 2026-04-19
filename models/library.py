@@ -1,13 +1,21 @@
-import json
-import os
+from __future__ import annotations
+
+from abstractions.protocols import LibraryPersistence
 from models.book import Book
+from services.json_library_persistence import JsonLibraryPersistence
 
 
 class Library:
-    def __init__(self, name: str, filepath: str = "library_data.json"):
+    def __init__(
+        self,
+        name: str,
+        filepath: str = "library_data.json",
+        persistence: LibraryPersistence | None = None,
+    ):
         self._name = name
         self._filepath = filepath
         self._books: list[Book] = []
+        self._persistence = persistence or JsonLibraryPersistence(filepath)
 
     def add_book(self, book: Book):
         self._books.append(book)
@@ -25,23 +33,23 @@ class Library:
             print(" •", book.get_info())
 
     def save(self):
-        data = {
+        payload = {
             "name": self._name,
             "books": [book.to_dict() for book in self._books],
         }
-        with open(self._filepath, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+        self._persistence.save(payload)
         print(f"💾 Saved {len(self._books)} of books → {self._filepath}")
 
     @classmethod
-    def load(cls, filepath: str = "library_data.json") -> "Library":
-        if not os.path.exists(filepath):
-            raise FileNotFoundError(f"File not found: {filepath}")
+    def load(
+        cls,
+        filepath: str = "library_data.json",
+        persistence: LibraryPersistence | None = None,
+    ) -> "Library":
+        store = persistence or JsonLibraryPersistence(filepath)
+        data = store.load()
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        library = cls(data["name"], filepath)
+        library = cls(data["name"], filepath, persistence=store)
         for book_data in data["books"]:
             library._books.append(Book.from_dict(book_data))
 

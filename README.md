@@ -1,6 +1,6 @@
 # Library Management System - OOP Python Project
 
-**A complete OOP project demonstrating all 4 programming pillars, design patterns, and comprehensive unit testing.**
+**A complete OOP project demonstrating all 4 programming pillars, SOLID-oriented layering, design patterns, and comprehensive unit testing.**
 
 ---
 
@@ -13,10 +13,11 @@ A library management system where:
 - ✅ Librarians manage member registrations and book lending
 - ✅ Data persists to JSON file and loads on restart
 
-**Lines of Code**: ~400 (small & complete)  
+**Lines of Code**: ~450 (small & complete)  
 **Test Coverage**: 14 unit tests (> 3 required)  
 **Design Patterns**: 1 (Factory Pattern)  
-**OOP Pillars**: All 4 (Abstraction, Inheritance, Polymorphism, Encapsulation)
+**OOP Pillars**: All 4 (Abstraction, Inheritance, Polymorphism, Encapsulation)  
+**SOLID**: Applied in catalog/persistence/fine-policy boundaries (see below)
 
 ---
 
@@ -53,18 +54,19 @@ Alice returned the book: Clean code
 
 ### Run Tests
 
+With pytest (if installed):
+
 ```bash
 python -m pytest test_library.py -v
 ```
 
-Expected result:
+With the standard library only:
 
+```bash
+python -m unittest test_library.py -v
 ```
-test_library.py::TestBorrowingLogic::test_borrow_book PASSED             [  7%]
-test_library.py::TestBorrowingLogic::test_borrow_unavailable_book PASSED [ 14%]
-... (12 more tests)
-============================== 14 passed in 0.02s ==============================
-```
+
+Expected result: **14 tests**, all passing.
 
 ---
 
@@ -72,16 +74,21 @@ test_library.py::TestBorrowingLogic::test_borrow_unavailable_book PASSED [ 14%]
 
 ```
 library/
+├── abstractions/                # Protocols (DIP / ISP)
+│   ├── __init__.py
+│   └── protocols.py            # LibraryCatalog, LibraryPersistence, FinePolicy
 ├── models/                      # Core domain classes
 │   ├── __init__.py
-│   ├── book.py                 # ⭐ Abstract Book + implementations
-│   ├── user.py                 # User with encapsulation
-│   ├── library.py              # Book collection manager
-│   ├── librarian.py            # Librarian operations (facade)
+│   ├── book.py                 # ⭐ Abstract Book + implementations + factory
+│   ├── user.py                 # User with encapsulation + injectable fine policy
+│   ├── library.py              # Catalog + orchestrated persistence
+│   ├── librarian.py            # Staff operations against LibraryCatalog
 │   └── loan.py                 # Loan tracking (dataclass)
+├── services/                    # Infrastructure (SRP)
+│   ├── __init__.py
+│   └── json_library_persistence.py  # JSON save/load only
 ├── utils/
-│   ├── fine_calculator.py      # Fine calculation logic
-│   └── storage.py              # (Extensible for future)
+│   └── fine_calculator.py      # Fine policy + helpers
 ├── main.py                      # ⭐ Demo script
 ├── test_library.py             # ⭐ 14 unit tests
 ├── library_data.json           # Persisted library data
@@ -196,6 +203,20 @@ class User:
 
 ---
 
+## 🧱 SOLID Principles (Where & Why)
+
+| Principle | Meaning (short) | In this project |
+|-----------|-----------------|-----------------|
+| **S** — Single Responsibility | One class, one reason to change | `JsonLibraryPersistence` only reads/writes JSON; `Library` focuses on the in-memory catalog and delegates I/O; `StandardFinePolicy` holds overdue rules. |
+| **O** — Open/Closed | Extend behaviour without editing stable core | New book types extend `Book` + factory (`from_dict` / `to_dict`); new fine rules: implement `FinePolicy` and pass into `User(..., fine_policy=...)` instead of changing `User`. |
+| **L** — Liskov Substitution | Subtypes must work wherever the base is expected | Any `Book` subtype can be stored, borrowed, and serialized through the same `Book` interface (`PhysicalBook`, `EBook`). |
+| **I** — Interface Segregation | Small, focused interfaces | `LibraryCatalog` exposes only what `Librarian` needs (`find_by_author`, `available_books`), not save/load internals. |
+| **D** — Dependency Inversion | Depend on abstractions, not concrete infrastructure | `Library` depends on `LibraryPersistence` (default: `JsonLibraryPersistence`); `Librarian` depends on `LibraryCatalog`; `User` depends on `FinePolicy` (default: `StandardFinePolicy`). |
+
+**Key files**: `abstractions/protocols.py`, `services/json_library_persistence.py`, `models/library.py`, `models/librarian.py`, `models/user.py`, `utils/fine_calculator.py`.
+
+---
+
 ## 🎯 Design Pattern: Factory
 
 **Location**: `models/book.py` (Lines 25-42)
@@ -273,8 +294,10 @@ def test_fine_calculation_overdue(self):
 ### Run All Tests
 
 ```bash
-python -m pytest test_library.py -v
+python -m unittest test_library.py -v
 ```
+
+(or `python -m pytest test_library.py -v` if pytest is installed)
 
 ---
 
@@ -304,13 +327,14 @@ python -m pytest test_library.py -v
 
 1. **Overview** (2-3 min) — What the system does
 2. **OOP Pillars** (4-5 min) — Explain each with code examples
-3. **Design Pattern** (2 min) — Factory pattern benefits
-4. **Unit Tests Walkthrough** (3 min) — Show test output
-5. **Live Demo** (3-4 min) — Run `main.py`, show JSON persistence
-6. **Design Decisions** (2 min) — Trade-offs & reasoning
-7. **Q&A** (2-3 min) — Address concerns
+3. **SOLID** (2 min) — `LibraryCatalog` / `LibraryPersistence` / `FinePolicy` and their defaults
+4. **Design Pattern** (2 min) — Factory pattern benefits
+5. **Unit Tests Walkthrough** (3 min) — Show test output
+6. **Live Demo** (3-4 min) — Run `main.py`, show JSON persistence
+7. **Design Decisions** (2 min) — Trade-offs & reasoning
+8. **Q&A** (2-3 min) — Address concerns
 
-**Total**: ~20-25 minutes (standard presentation length)
+**Total**: ~22-28 minutes (adds a short SOLID segment; trim other parts if you must stay at 25 min)
 
 ---
 
@@ -342,6 +366,7 @@ python -m pytest test_library.py -v
 - ✅ Private attributes with `@property` access
 - ✅ Comprehensive docstrings
 - ✅ Clean separation of concerns
+- ✅ SOLID-oriented boundaries (protocols + default adapters)
 
 ---
 
@@ -365,18 +390,20 @@ python -m pytest test_library.py -v
 - ✅ Property decorators for encapsulation
 - ✅ Static factory methods for polymorphic creation
 - ✅ Comprehensive test coverage
+- ✅ `typing.Protocol` for dependency inversion (catalog, persistence, fines)
 
 ---
 
 ## 📖 Reading Order for Project Review
 
 1. Start: **README.md** (this file) — Overview
-2. Code: **models/book.py** — Abstraction + Polymorphism + Factory
-3. Code: **models/user.py** — Encapsulation
-4. Demo: Run `python main.py` — See it in action
-5. Tests: Run `python -m pytest test_library.py -v` — Validate all features
-6. Deepen: **DESIGN_DOCUMENTATION.md** — Detailed explanations
-7. Present: **PRESENTATION_SCRIPT.md** — Talking points
+2. Code: **abstractions/protocols.py** — SOLID contracts (catalog, persistence, fines)
+3. Code: **models/book.py** — Abstraction + Polymorphism + Factory
+4. Code: **models/user.py** — Encapsulation + injectable `FinePolicy`
+5. Demo: Run `python main.py` — See it in action
+6. Tests: Run `python -m unittest test_library.py -v` — Validate all features
+7. Deepen: **DESIGN_DOCUMENTATION.md** — Detailed explanations
+8. Present: **PRESENTATION_SCRIPT.md** — Talking points
 
 ---
 
@@ -426,7 +453,8 @@ def reserve_book(self, user: User, book: Book):
 - **"Where is abstraction?"** → Check [QUICK_REFERENCE.md](QUICK_REFERENCE.md) table
 - **"How do I defend design decisions?"** → See [PRESENTATION_SCRIPT.md](PRESENTATION_SCRIPT.md) Part 7
 - **"Why use factory pattern?"** → See [DESIGN_DOCUMENTATION.md](DESIGN_DOCUMENTATION.md) Section 2.1
-- **"Run tests?"** → `python -m pytest test_library.py -v`
+- **"Run tests?"** → `python -m unittest test_library.py -v` (or pytest if available)
+- **"Where is SOLID?"** → See table above and `abstractions/protocols.py`
 - **"Run demo?"** → `python main.py`
 
 ---
@@ -434,14 +462,15 @@ def reserve_book(self, user: User, book: Book):
 ## 📊 Project Stats
 
 ```
-Files:           9 (models: 4, utils: 2, root: 3)
-Lines of Code:   ~400 (excluding comments)
+Files:           12+ (models, abstractions, services, utils, tests, demo)
+Lines of Code:   ~450 (excluding comments)
 Test Cases:      14 (all passing ✓)
 OOP Pillars:     4/4 implemented
-Design Patterns: 1/1 implemented
+SOLID:           Demonstrated via protocols + focused service classes
+Design Patterns: 1/1 implemented (Factory)
 Test Pass Rate:  100% (14/14)
 Coverage:        Core functionality + edge cases
-Documentation:   4 comprehensive guides included
+Documentation:   4 comprehensive guides + this README
 ```
 
 ---

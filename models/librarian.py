@@ -1,12 +1,12 @@
-from models.user import User
+from abstractions.protocols import LibraryCatalog
 from models.book import Book
-from models.library import Library
+from models.user import User
 
 
 class Librarian:
     """Librarian manages the library and its operations"""
 
-    def __init__(self, name: str, library: Library):
+    def __init__(self, name: str, library: LibraryCatalog):
         self._name = name
         self._library = library
         self._members: list[User] = []
