@@ -40,7 +40,7 @@ class User:
         )
         self._borrowed_books.append(book)
         self._loans.append(loan)
-        print(f"{self._name} took the book: {book.title} (срок сдачи: {due_date})")
+        print(f"{self._name} took the book: {book.title} (due date: {due_date})")
 
     def return_book(self, book, return_date: date = None):
         if book not in self._borrowed_books:
@@ -59,7 +59,7 @@ class User:
             fine = self._fine_policy.calculate(loan)
             print(fine_report(loan, self._fine_policy))
             if fine > 0:
-                print(f"   ⚠️  Пожалуйста, оплатите пеню: {fine:.2f} €")
+                print(f"   ⚠️  Please pay the fine: {fine:.2f} €")
 
         book.return_book()
         self._borrowed_books.remove(book)

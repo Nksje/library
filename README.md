@@ -39,7 +39,7 @@ The book is added: Learning Python
 📋 Member registered: Bob
 
 --- Borrowing books ---
-Alice took the book: Clean code (срок сдачи: 2026-04-06)
+Alice took the book: Clean code (due date: 2026-04-06)
 Library: Narva City Library
  • [Printed] Clean code — Robert Martin (2008), 464 pg. [issued]
  • [Electric] Design patterns — Group of four (1994), 12.5 MB [available]
